@@ -11,12 +11,6 @@ resource "castai_eks_user_arn" "castai_user_arn" {
   cluster_id = castai_eks_clusterid.cluster_id.id
 }
 
-
-provider "castai" {
-  api_url   = var.castai_api_url
-  api_token = var.castai_api_token
-}
-
 provider "helm" {
   kubernetes {
     host                   = module.eks.cluster_endpoint
