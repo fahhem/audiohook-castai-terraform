@@ -3,6 +3,10 @@ provider "aws" {
   region = var.cluster_region
 }
 
+provider "castai" {
+  api_token = var.castai_api_token
+}
+
 provider "kubernetes" {
   host                   = module.eks.cluster_endpoint
   cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
