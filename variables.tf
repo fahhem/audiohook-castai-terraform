@@ -15,6 +15,11 @@ variable "cluster_version" {
   default     = "1.24"
 }
 
+variable "cluster_vpc_id" {
+  type        = string
+  description = "EKS cluster VPC ID"
+}
+
 variable "castai_api_url" {
   type = string
   description = "URL of alternative CAST AI API to be used during development or testing"
