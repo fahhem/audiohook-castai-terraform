@@ -57,7 +57,7 @@ module "castai-eks-cluster" {
   # Here:
   #  - unschedulablePods - Unscheduled pods policy
   #  - nodeDownscaler    - Node deletion policy
-  autoscaler_policies_json = ""
+  autoscaler_policies_json = "{}"
 
   # depends_on helps Terraform with creating proper dependencies graph in case of resource creation and in this case destroy.
   # module "castai-eks-cluster" has to be destroyed before module "castai-eks-role-iam".
