@@ -40,6 +40,21 @@ module "castai-eks-cluster" {
   aws_assume_role_arn        = module.castai-eks-role-iam.role_arn
   delete_nodes_on_disconnect = var.delete_nodes_on_disconnect
 
+  default_node_configuration = module.castai-eks-cluster.castai_node_configurations["default"]
+
+  node_configurations = {
+    default = {
+      subnets = data.aws_subnets.existing_cluster.ids
+      tags    = var.tags
+      security_groups = [
+        local.eks_cluster.cluster_primary_security_group_id,
+        local.eks_cluster.cluster_security_group_id,
+        local.eks_cluster.node_security_group_id,
+      ]
+      instance_profile_arn = module.castai-eks-role-iam.instance_profile_arn
+    }
+  }
+
   # Configure Autoscaler policies as per API specification https://api.cast.ai/v1/spec/#/PoliciesAPI/PoliciesAPIUpsertClusterPolicies.
   # Here:
   #  - unschedulablePods - Unscheduled pods policy

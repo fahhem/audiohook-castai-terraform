@@ -17,6 +17,12 @@ provider "castai" {
 data "aws_eks_cluster" "existing_cluster" {
   name = var.cluster_name
 }
+data "aws_subnets" "existing_cluster" {
+  filter {
+    name   = "vpc-id"
+    values = [for vpc in data.aws_eks_cluster.existing_cluster.vpc_config : vpc.vpc_id]
+  }
+}
 
 provider "kubernetes" {
   host                   = local.eks_cluster.cluster_endpoint
