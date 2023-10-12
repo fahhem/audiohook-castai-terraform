@@ -12,7 +12,7 @@ module "castai-eks-role-iam" {
   aws_account_id     = data.aws_caller_identity.current.account_id
   aws_cluster_region = var.cluster_region
   aws_cluster_name   = var.cluster_name
-  aws_cluster_vpc_id = local.eks_cluster.vpc_config.cluster_security_group_id
+  aws_cluster_vpc_id = local.eks_cluster.vpc_config[0].cluster_security_group_id
 
   castai_user_arn = castai_eks_user_arn.castai_user_arn.arn
 
@@ -47,8 +47,8 @@ module "castai-eks-cluster" {
       subnets = data.aws_subnets.existing_cluster.ids
       tags    = var.tags
       security_groups = concat([
-        local.eks_cluster.vpc_config.cluster_security_group_id,
-      ], local.eks_cluster.vpc_config.security_group_ids)
+        local.eks_cluster.vpc_config[0].cluster_security_group_id,
+      ], local.eks_cluster.vpc_config[0].security_group_ids)
       instance_profile_arn = module.castai-eks-role-iam.instance_profile_arn
     }
   }
