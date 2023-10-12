@@ -15,21 +15,6 @@ variable "cluster_version" {
   default     = "1.24"
 }
 
-variable "cluster_security_group_id" {
-  type = string
-  description = "Cluster security group ID. Group name should be 'eks-cluster-sg-zeet-{cluster_name}-{timestamp}'"
-}
-
-variable "node_security_group_id" {
-  type = string
-  description = "Cluster node security group ID. Group name should be 'zeet-{cluster_name}-node'"
-}
-
-variable "cluster_vpc_id" {
-  type        = string
-  description = "EKS cluster VPC ID"
-}
-
 variable "castai_api_url" {
   type = string
   description = "URL of alternative CAST AI API to be used during development or testing"

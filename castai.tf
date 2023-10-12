@@ -1,11 +1,17 @@
 # 3. Connect EKS cluster to CAST AI.
 
 locals {
-  role_name = "castai-eks-role"
+  role_name   = "castai-eks-role"
+  eks_cluster = data.aws_eks_cluster.existing_cluster
 }
 
 # Configure Data sources and providers required for CAST AI connection.
 data "aws_caller_identity" "current" {}
+
+# Import the existing cluster
+data "aws_eks_cluster" "existing_cluster" {
+  name = var.cluster_name
+}
 
 resource "castai_eks_user_arn" "castai_user_arn" {
   cluster_id = castai_eks_clusterid.cluster_id.id
@@ -13,13 +19,13 @@ resource "castai_eks_user_arn" "castai_user_arn" {
 
 provider "helm" {
   kubernetes {
-    host                   = module.eks.cluster_endpoint
+    host                   = eks_cluster.cluster_endpoint
     cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
     exec {
       api_version = "client.authentication.k8s.io/v1beta1"
       command     = "aws"
       # This requires the awscli to be installed locally where Terraform is executed.
-      args = ["eks", "get-token", "--cluster-name", module.eks.cluster_name, "--region", var.cluster_region]
+      args = ["eks", "get-token", "--cluster-name", eks_cluster.cluster_name, "--region", eks_cluster.cluster_region]
     }
   }
 }
@@ -29,9 +35,9 @@ module "castai-eks-role-iam" {
   source = "castai/eks-role-iam/castai"
 
   aws_account_id     = data.aws_caller_identity.current.account_id
-  aws_cluster_region = var.cluster_region
-  aws_cluster_name   = var.cluster_name
-  aws_cluster_vpc_id = var.cluster_vpc_id
+  aws_cluster_region = eks_cluster.cluster_region
+  aws_cluster_name   = eks_cluster.cluster_name
+  aws_cluster_vpc_id = eks_cluster.cluster_security_group_id
 
   castai_user_arn = castai_eks_user_arn.castai_user_arn.arn
 
@@ -66,8 +72,8 @@ module "castai-eks-cluster" {
       subnets = module.vpc.private_subnets
       tags    = var.tags
       security_groups = [
-        var.cluster_security_group_id,
-        var.node_security_group_id,
+        eks_cluster.cluster_security_group_id,
+        eks_cluster.node_security_group_id,
         aws_security_group.additional.id,
       ]
       instance_profile_arn = module.castai-eks-role-iam.instance_profile_arn
