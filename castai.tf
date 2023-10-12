@@ -48,7 +48,7 @@ module "castai-eks-cluster" {
       tags    = var.tags
       security_groups = concat([
         local.eks_cluster.vpc_config[0].cluster_security_group_id,
-      ], local.eks_cluster.vpc_config[0].security_group_ids)
+      ], tolist(local.eks_cluster.vpc_config[0].security_group_ids)
       instance_profile_arn = module.castai-eks-role-iam.instance_profile_arn
     }
   }
