@@ -12,7 +12,7 @@ module "castai-eks-role-iam" {
   aws_account_id     = data.aws_caller_identity.current.account_id
   aws_cluster_region = var.cluster_region
   aws_cluster_name   = var.cluster_name
-  aws_cluster_vpc_id = local.eks_cluster.cluster_security_group_id
+  aws_cluster_vpc_id = local.eks_cluster.vpc_config.cluster_security_group_id
 
   castai_user_arn = castai_eks_user_arn.castai_user_arn.arn
 

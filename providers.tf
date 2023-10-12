@@ -26,7 +26,7 @@ data "aws_subnets" "existing_cluster" {
 
 provider "kubernetes" {
   host                   = local.eks_cluster.endpoint
-  cluster_ca_certificate = base64decode(local.eks_cluster.cluster_certificate_authority_data)
+  cluster_ca_certificate = base64decode(local.eks_cluster.certificate_authority[0].data)
   exec {
     api_version = "client.authentication.k8s.io/v1beta1"
     command     = "aws"
@@ -38,7 +38,7 @@ provider "kubernetes" {
 provider "helm" {
   kubernetes {
     host                   = local.eks_cluster.endpoint
-    cluster_ca_certificate = base64decode(local.eks_cluster.cluster_certificate_authority_data)
+    cluster_ca_certificate = base64decode(local.eks_cluster.certificate_authority[0].data)
     exec {
       api_version = "client.authentication.k8s.io/v1beta1"
       command     = "aws"
