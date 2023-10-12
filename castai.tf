@@ -47,10 +47,8 @@ module "castai-eks-cluster" {
       subnets = data.aws_subnets.existing_cluster.ids
       tags    = var.tags
       security_groups = [
-        local.eks_cluster.cluster_primary_security_group_id,
-        local.eks_cluster.cluster_security_group_id,
-        local.eks_cluster.node_security_group_id,
-      ]
+        local.eks_cluster.vpc_config.cluster_security_group_id,
+      ] + local.eks_cluster.vpc_config.security_group_ids
       instance_profile_arn = module.castai-eks-role-iam.instance_profile_arn
     }
   }
