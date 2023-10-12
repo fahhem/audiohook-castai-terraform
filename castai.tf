@@ -10,8 +10,8 @@ module "castai-eks-role-iam" {
   source = "castai/eks-role-iam/castai"
 
   aws_account_id     = data.aws_caller_identity.current.account_id
-  aws_cluster_region = local.eks_cluster.cluster_region
-  aws_cluster_name   = local.eks_cluster.cluster_name
+  aws_cluster_region = var.cluster_region
+  aws_cluster_name   = var.cluster_name
   aws_cluster_vpc_id = local.eks_cluster.cluster_security_group_id
 
   castai_user_arn = castai_eks_user_arn.castai_user_arn.arn
@@ -22,8 +22,8 @@ module "castai-eks-role-iam" {
 # Configure EKS cluster connection using CAST AI eks-cluster module.
 resource "castai_eks_clusterid" "cluster_id" {
   account_id   = data.aws_caller_identity.current.account_id
-  region       = local.eks_cluster.cluster_region
-  cluster_name = local.eks_cluster.cluster_name
+  region       = var.cluster_region
+  cluster_name = var.cluster_name
 }
 
 module "castai-eks-cluster" {
@@ -34,8 +34,8 @@ module "castai-eks-cluster" {
   wait_for_cluster_ready = true
 
   aws_account_id     = data.aws_caller_identity.current.account_id
-  aws_cluster_region = local.eks_cluster.cluster_region
-  aws_cluster_name   = local.eks_cluster.cluster_name
+  aws_cluster_region = var.cluster_region
+  aws_cluster_name   = var.cluster_name
 
   aws_assume_role_arn        = module.castai-eks-role-iam.role_arn
   delete_nodes_on_disconnect = var.delete_nodes_on_disconnect
