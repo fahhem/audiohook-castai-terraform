@@ -35,6 +35,7 @@ resource "kubernetes_config_map_v1_data" "castai_aws_auth" {
       ]
     })
   }
+  force = true
 }
 
 # Configure EKS cluster connection using CAST AI eks-cluster module.
