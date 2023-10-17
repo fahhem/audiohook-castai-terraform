@@ -19,6 +19,24 @@ module "castai-eks-role-iam" {
   create_iam_resources_per_cluster = true
 }
 
+# Add the CastAI IAM role so CastAI nodes can join the cluster
+resource "kubernetes_config_map_v1_data" "castai_aws_auth" {
+  metadata {
+    namespace = "kube-system"
+    name      = "aws-auth"
+  }
+  data = {
+    mapRoles = yamlencode({
+      rolearn  = module.castai-eks-role-iam.role_arn,
+      username = "system:node:{{EC2PrivateDNSName}}"
+      groups = [
+        "system:bootstrappers",
+        "system:nodes"
+      ]
+    })
+  }
+}
+
 # Configure EKS cluster connection using CAST AI eks-cluster module.
 resource "castai_eks_clusterid" "cluster_id" {
   account_id   = data.aws_caller_identity.current.account_id
