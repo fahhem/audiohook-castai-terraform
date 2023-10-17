@@ -27,7 +27,7 @@ resource "kubernetes_config_map_v1_data" "castai_aws_auth" {
   }
   data = {
     mapRoles = yamlencode({
-      rolearn  = module.castai-eks-role-iam.role_arn,
+      rolearn  = module.castai-eks-role-iam.instance_profile_role_arn,
       username = "system:node:{{EC2PrivateDNSName}}"
       groups = [
         "system:bootstrappers",
