@@ -83,7 +83,7 @@ module "castai-eks-cluster" {
   depends_on = [module.castai-eks-role-iam]
 }
 
-resource "castai_rebalancing_schedule" "spots" {
+resource "castai_rebalancing_schedule" "spots2" {
   name = "rebalance spots at every 30th minute ${var.cluster_name}"
   schedule {
     cron = "*/30 * * * *"
@@ -114,8 +114,8 @@ resource "castai_rebalancing_schedule" "spots" {
   }
 }
 
-resource "castai_rebalancing_job" "spots" {
+resource "castai_rebalancing_job" "spots2" {
   cluster_id              = castai_eks_clusterid.cluster_id.id
-  rebalancing_schedule_id = castai_rebalancing_schedule.spots.id
+  rebalancing_schedule_id = castai_rebalancing_schedule.spots2.id
   enabled                 = true
 }
