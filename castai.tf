@@ -19,22 +19,36 @@ module "castai-eks-role-iam" {
   create_iam_resources_per_cluster = true
 }
 
-# Add the CastAI IAM role so CastAI nodes can join the cluster
+# Add the CastAI IAM role so CastAI nodes can join the cluster.
+# We do this by reading the current maproles, then adding ours
+locals {
+  current_maproles = yamldecode(data.kubernetes_config_map.current_aws_auth.data["mapRoles"])
+  updated_maproles = concat(local.current_maproles, [
+    {
+      rolearn  = module.castai-eks-role-iam.instance_profile_role_arn
+      username = "system:node:{{EC2PrivateDNSName}}"
+      groups   = ["system:bootstrappers", "system:nodes"]
+    }
+  ])
+}
+
+data "kubernetes_config_map" "current_aws_auth" {
+  metadata {
+    name      = "aws-auth"
+    namespace = "kube-system"
+  }
+}
+
 resource "kubernetes_config_map_v1_data" "castai_aws_auth" {
   metadata {
     namespace = "kube-system"
     name      = "aws-auth"
   }
+
   data = {
-    mapRoles = yamlencode({
-      rolearn  = module.castai-eks-role-iam.instance_profile_role_arn,
-      username = "system:node:{{EC2PrivateDNSName}}"
-      groups = [
-        "system:bootstrappers",
-        "system:nodes"
-      ]
-    })
+    mapRoles = yamlencode(local.updated_maproles)
   }
+
   force = true
 }
 
