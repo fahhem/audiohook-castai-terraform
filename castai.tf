@@ -23,13 +23,13 @@ module "castai-eks-role-iam" {
 # We do this by reading the current maproles, then adding ours
 locals {
   current_maproles = yamldecode(data.kubernetes_config_map.current_aws_auth.data["mapRoles"])
-  updated_maproles = concat(local.current_maproles, [
+  updated_maproles = distinct(concat(local.current_maproles, [
     {
       rolearn  = module.castai-eks-role-iam.instance_profile_role_arn
       username = "system:node:{{EC2PrivateDNSName}}"
       groups   = ["system:bootstrappers", "system:nodes"]
     }
-  ])
+  ]))
 }
 
 data "kubernetes_config_map" "current_aws_auth" {
