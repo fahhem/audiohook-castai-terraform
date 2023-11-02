@@ -85,12 +85,188 @@ module "castai-eks-cluster" {
       instance_profile_arn = module.castai-eks-role-iam.instance_profile_arn
     }
   }
+  node_templates = {
+    default_by_castai = {
+      name = "default-by-castai"
+      configuration_id = module.castai-eks-cluster.castai_node_configurations["default"]
+      is_default   = true
+      should_taint = false
+
+      constraints = {
+        on_demand          = true
+        spot               = true
+        use_spot_fallbacks = true
+
+        enable_spot_diversity                       = false
+        spot_diversity_price_increase_limit_percent = 20
+
+        spot_interruption_predictions_enabled = true
+        spot_interruption_predictions_type = "aws-rebalance-recommendations"
+      }
+    }
+    Application = {
+      configuration_id = module.castai-eks-cluster.castai_node_configurations["default"]
+      should_taint     = true
+
+      custom_labels = {
+        audiohook.com/application = "bidder"
+      }
+
+      custom_taints = [
+        {
+          key = "audiohook.com/application"
+          value = "bidder"
+          effect = "NoSchedule"
+        },
+      ]
+
+      constraints = {
+        fallback_restore_rate_seconds = 1800
+        spot                          = true
+        use_spot_fallbacks            = true
+        spot_interruption_predictions_enabled = true
+        spot_interruption_predictions_type = "interruption-predictions"
+      }
+    }
+    Dedicated = {
+      configuration_id = module.castai-eks-cluster.castai_node_configurations["default"]
+      should_taint     = true
+
+      custom_labels = {
+        zeet.co/dedicated = "guaranteed"
+      }
+
+      custom_taints = [
+        {
+          key = "zeet.co/dedicated"
+          value = "guaranteed"
+          effect = "NoSchedule"
+        },
+      ]
+
+      constraints = {
+        fallback_restore_rate_seconds = 1800
+        spot                          = true
+        use_spot_fallbacks            = true
+        spot_interruption_predictions_enabled = true
+        spot_interruption_predictions_type = "interruption-predictions"
+        max_cpu                       = 8
+      }
+    }
+    Dedicated-Dedicated = {
+      configuration_id = module.castai-eks-cluster.castai_node_configurations["default"]
+      should_taint     = true
+
+      custom_labels = {
+        zeet.co/dedicated = "dedicated"
+      }
+
+      custom_taints = [
+        {
+          key = "zeet.co/dedicated"
+          value = "dedicated"
+          effect = "NoSchedule"
+        },
+      ]
+
+      constraints = {
+        fallback_restore_rate_seconds = 1800
+        spot                          = true
+        use_spot_fallbacks            = true
+        spot_interruption_predictions_enabled = true
+        spot_interruption_predictions_type = "interruption-predictions"
+      }
+    }
+    Guaranteed = {
+      configuration_id = module.castai-eks-cluster.castai_node_configurations["default"]
+      should_taint     = true
+
+      custom_labels = {
+        zeet.co/dedicated = "system"
+      }
+
+      custom_taints = []
+
+      constraints = {
+        spot                          = false
+        spot_interruption_predictions_enabled = true
+      }
+    }
+  }
 
   # Configure Autoscaler policies as per API specification https://api.cast.ai/v1/spec/#/PoliciesAPI/PoliciesAPIUpsertClusterPolicies.
   # Here:
   #  - unschedulablePods - Unscheduled pods policy
   #  - nodeDownscaler    - Node deletion policy
-  autoscaler_policies_json = "{}"
+  autoscaler_policies_json = <<-EOT
+    {
+      "clusterLimits": {
+        "cpu": {
+          "maxCores": 20,
+          "minCores": 1
+        },
+        "enabled": true
+      },
+      "enabled": false,
+      "isScopedMode": false,
+      "nodeDownscaler": {
+        "emptyNodes": {
+          "delaySeconds": 0,
+          "enabled": false
+        },
+        "enabled": true,
+        "evictor": {
+          "aggressiveMode": false,
+          "allowed": true,
+          "cycleInterval": "5m10s",
+          "dryRun": false,
+          "enabled": false,
+          "nodeGracePeriodMinutes": 10,
+          "scopedMode": false,
+          "status": "Unknown"
+        }
+      },
+      "spotInstances": {
+        "clouds": [
+          "aws"
+        ],
+        "enabled": false,
+        "maxReclaimRate": 0,
+        "spotBackups": {
+          "enabled": false,
+          "spotBackupRestoreRateSeconds": 1800
+        },
+        "spotDiversityEnabled": false,
+        "spotDiversityPriceIncreaseLimitPercent": 20,
+        "spotInterruptionPredictions": {
+          "enabled": false,
+          "type": "AWSRebalanceRecommendations"
+        }
+      },
+      "unschedulablePods": {
+        "customInstancesEnabled": true,
+        "diskGibToCpuRatio": 5,
+        "enabled": false,
+        "headroom": {
+          "cpuPercentage": 10,
+          "enabled": true,
+          "memoryPercentage": 10
+        },
+        "headroomSpot": {
+          "cpuPercentage": 10,
+          "enabled": true,
+          "memoryPercentage": 10
+        },
+        "nodeConstraints": {
+          "enabled": false,
+          "maxCpuCores": 32,
+          "maxRamMib": 262144,
+          "minCpuCores": 2,
+          "minRamMib": 2048
+        }
+      }
+    }
+  EOT
 
   # depends_on helps Terraform with creating proper dependencies graph in case of resource creation and in this case destroy.
   # module "castai-eks-cluster" has to be destroyed before module "castai-eks-role-iam".
