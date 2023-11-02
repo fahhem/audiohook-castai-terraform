@@ -109,7 +109,7 @@ module "castai-eks-cluster" {
       should_taint     = true
 
       custom_labels = {
-        audiohook.com/application = "bidder"
+        "audiohook.com/application" = "bidder"
       }
 
       custom_taints = [
@@ -133,7 +133,7 @@ module "castai-eks-cluster" {
       should_taint     = true
 
       custom_labels = {
-        zeet.co/dedicated = "guaranteed"
+        "zeet.co/dedicated" = "guaranteed"
       }
 
       custom_taints = [
@@ -158,7 +158,7 @@ module "castai-eks-cluster" {
       should_taint     = true
 
       custom_labels = {
-        zeet.co/dedicated = "dedicated"
+        "zeet.co/dedicated" = "dedicated"
       }
 
       custom_taints = [
@@ -182,7 +182,7 @@ module "castai-eks-cluster" {
       should_taint     = true
 
       custom_labels = {
-        zeet.co/dedicated = "system"
+        "zeet.co/dedicated" = "system"
       }
 
       custom_taints = []
