@@ -200,71 +200,31 @@ module "castai-eks-cluster" {
   #  - nodeDownscaler    - Node deletion policy
   autoscaler_policies_json = <<-EOT
     {
-      "clusterLimits": {
-        "cpu": {
-          "maxCores": 20,
-          "minCores": 1
-        },
-        "enabled": true
-      },
-      "enabled": false,
-      "isScopedMode": false,
-      "nodeDownscaler": {
-        "emptyNodes": {
-          "delaySeconds": 0,
-          "enabled": false
-        },
         "enabled": true,
-        "evictor": {
-          "aggressiveMode": false,
-          "allowed": true,
-          "cycleInterval": "5m10s",
-          "dryRun": false,
-          "enabled": false,
-          "nodeGracePeriodMinutes": 10,
-          "scopedMode": false,
-          "status": "Unknown"
-        }
-      },
-      "spotInstances": {
-        "clouds": [
-          "aws"
-        ],
-        "enabled": false,
-        "maxReclaimRate": 0,
-        "spotBackups": {
-          "enabled": false,
-          "spotBackupRestoreRateSeconds": 1800
+        "unschedulablePods": {
+            "enabled": true
         },
-        "spotDiversityEnabled": false,
-        "spotDiversityPriceIncreaseLimitPercent": 20,
-        "spotInterruptionPredictions": {
-          "enabled": false,
-          "type": "AWSRebalanceRecommendations"
-        }
-      },
-      "unschedulablePods": {
-        "customInstancesEnabled": true,
-        "diskGibToCpuRatio": 5,
-        "enabled": false,
-        "headroom": {
-          "cpuPercentage": 10,
-          "enabled": true,
-          "memoryPercentage": 10
+        "nodeDownscaler": {
+            "enabled": true,
+            "emptyNodes": {
+                "enabled": true
+            },
+            "evictor": {
+                "aggressiveMode": false,
+                "cycleInterval": "5m10s",
+                "dryRun": false,
+                "enabled": true,
+                "nodeGracePeriodMinutes": 10,
+                "scopedMode": false
+            }
         },
-        "headroomSpot": {
-          "cpuPercentage": 10,
-          "enabled": true,
-          "memoryPercentage": 10
-        },
-        "nodeConstraints": {
-          "enabled": false,
-          "maxCpuCores": 32,
-          "maxRamMib": 262144,
-          "minCpuCores": 2,
-          "minRamMib": 2048
+        "clusterLimits": {
+            "cpu": {
+                "maxCores": 20,
+                "minCores": 1
+            },
+            "enabled": false
         }
-      }
     }
   EOT
 
